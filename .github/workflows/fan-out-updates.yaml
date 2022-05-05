@@ -1,9 +1,8 @@
 name: "Fan out plugin updates"
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [published]
 
 jobs:
   notify:
@@ -11,6 +10,6 @@ jobs:
     uses: KL-Engineering/central-microgateway-configuration/.github/workflows/sync-plugin.yaml@main
     with:
       github-repository-name: ${{ github.event.repository.name }}
-      tag: ${GITHUB_SHA::7}
+      tag: ${GITHUB_REF_NAME}
     secrets:
       github-token: ${{ secrets.GATEWAY_CONFIG_SYNC_BOT }}
