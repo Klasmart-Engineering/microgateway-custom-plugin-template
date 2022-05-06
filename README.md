@@ -21,6 +21,21 @@ go build -buildmode=plugin -o yourplugin.so .
 3. Go into the `Makefile` and update the `build` target to have the same command as step 2. _(namely making the name of
    the outputted `.so` file is correct)_
 
+## Running locally
+
+1. Authenticate to the [github container registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#authenticating-to-the-container-registry)
+```sh
+export GH_PAT="your personal github access token here - must have read packages scope at a minimum"
+
+echo $GH_PAT | docker login ghcr.io -u USERNAME --password-stdin
+```
+
+2. Update your `krakend.json` file to use the plugin you're working on
+3. Build and run the docker image
+```sh
+docker buildx build -t gateway . && docker run gateway
+```
+
 ## Make
 
 The `Makefile` is required as it is used by other tooling (namely the `Dockerfile` for the microgateways) in order to
