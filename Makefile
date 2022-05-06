@@ -1,7 +1,7 @@
 all: clean build
 
 build:
-	go build -buildmode=plugin -o <plugin-name>.so .
+	go build -buildmode=plugin -o krakend-wildcard.so .
 
 clean:
 	go clean
@@ -13,6 +13,6 @@ b:
 	docker buildx build -t gateway .
 
 r:
-	docker run gateway
+	docker run -p "8080:8080" gateway
 
 br: b r
