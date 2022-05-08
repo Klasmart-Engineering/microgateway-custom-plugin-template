@@ -36,6 +36,22 @@ echo $GH_PAT | docker login ghcr.io -u USERNAME --password-stdin
 docker buildx build -t gateway . && docker run gateway
 ```
 
+Alternately, the make file includes a number of commands which can do this for you
+
+```sh
+# Log in to GHCR - make sure you have $GH_PAT set in your shell
+make login
+
+# Build and run the gateway
+make br
+
+# Build
+make b
+
+# Run
+make r
+```
+
 ## Make
 
 The `Makefile` is required as it is used by other tooling (namely the `Dockerfile` for the microgateways) in order to

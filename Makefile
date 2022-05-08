@@ -1,7 +1,7 @@
 all: clean build
 
 build:
-	go build -buildmode=plugin -o krakend-wildcard.so .
+	go build -buildmode=plugin -o <plugin-name>.so .
 
 clean:
 	go clean
