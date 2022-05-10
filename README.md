@@ -21,43 +21,70 @@ go build -buildmode=plugin -o yourplugin.so .
 3. Go into the `Makefile` and update the `build` target to have the same command as step 2. _(namely making the name of
    the outputted `.so` file is correct)_
 
-## Running locally
+4. Submit a PR to the [Central Repository](https://github.com/KL-Engineering/central-microgateway-configuration/blob/main/plugins.json) adding your repository to the list of plugin repositories. This will enable us to automatically raise PR's when updates are made centrally
+
+5. Go into `.github/workflows/integration-test.yaml` and update the information accordingly.
+
+## Included Artifacts
+
+### Dockerfile & KrakenD.json
+
+When developing a plugin, it is quite likely that you will want to run it against a KrakenD instance to debug/verify behaviour. The `Dockerfile` and `krakend.json` files give you a barebones gateway that you can very quickly get up and running with. Please feel free to customise this as you like.
+
+### Makefile
+
+The [Makefile](Makefile) has a number of helper commands to get you up and running quickly. There are a number of
+**protected** commands _(these are protected as they're used in build pipelines)_. If you think there is a reason to change
+them specific to your use-case please contact the API management team to confirm.
+
+For any targets that are not `PROTECTED` please free to edit and add to the `Makefile` as you wish
+
+| Command       | Description                                                                                                                                       | Status      |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `make build`  | Builds the plugin in the intended format _<name>.so_                                                                                              | `PROTECTED` |
+| `make login`  | Logs you into GitHub Container Registry - must have `GH_PAT` environment variable set in your shell - see [GitHub Personal Access Token](#GH-PAT) |             |
+| `make b`      | Builds a microgateway with the configuration found in `krakend.json` - this is useful for local testing                                           |             |
+| `make r`      | Runs the microgateway built by the step above                                                                                                     |             |
+| `make br`     | Alias to run both the build and run commands in a single step                                                                                     |             |
+| `make run-ci` | Command to run the POSTMAN integration tests in the CI environment                                                                                | `PROTECTED` |
+
+### GitHub Actions
+
+There are two GitHub actions included out of the box
+
+1. `fan-out-updates` is an action that is used to automatically sync consumers of your plugin whenever you create a new release
+2. `integration-test` is a basic action that will run integration tests using the artifacts in this repository. It assumes your tests are written as part of your Postman Collection
+   - `Dockerfile`
+   - `krakend.json`
+   - Postman collections
+
+## GH PAT
+
+This refers to the GitHub Personal Access Token. This is a token that is specific to your own GitHub account and grants
+access to GitHub resources. The resources we're primarily interested in here are the centrally managed docker images _(used to build krakend plugins & the base gateway image)_
+
+This PAT will need to have permissions that at a minmum can read `repos` and `packages`. You will also
+need to enable SSO on the GITHUB PAT.
+
+### Authenticating manually
 
 1. Authenticate to the [github container registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#authenticating-to-the-container-registry)
+
 ```sh
 export GH_PAT="your personal github access token here - must have read packages scope at a minimum"
 
 echo $GH_PAT | docker login ghcr.io -u USERNAME --password-stdin
 ```
 
-2. Update your `krakend.json` file to use the plugin you're working on
-3. Build and run the docker image
-```sh
-docker buildx build -t gateway . && docker run gateway
-```
+## Integration Tests
 
-Alternately, the make file includes a number of commands which can do this for you
+We opted to use Postman as an integration testing tool, primarily because it's reasonably language agonistic and
+well-known in the industry. Similarly it's useful for running both locally and in CI.
 
-```sh
-# Log in to GHCR - make sure you have $GH_PAT set in your shell
-make login
+Please make sure you commit both the postman `collection` and `environment` files - _environment file should be for
+CI/local development_
 
-# Build and run the gateway
-make br
-
-# Build
-make b
-
-# Run
-make r
-```
-
-## Make
-
-The `Makefile` is required as it is used by other tooling (namely the `Dockerfile` for the microgateways) in order to
-keep builds consistent across the company. As such please make sure the `all`, `build` and `clean` targets are all set
-up to run correctly. Please feel free to add additional targets as required for your project, but please keep the 3
-targets above limited in their scope.
+You can then use the [reuseable workflow](https://github.com/KL-Engineering/central-microgateway-configuration/blob/main/.github/workflows/plugin-integration-test.yaml) to easily set up a CI pipeline for your plugin.
 
 ## KrakenD Docs
 

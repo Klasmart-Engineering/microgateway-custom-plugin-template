@@ -1,7 +1,7 @@
 all: clean build
 
 build:
-	go build -buildmode=plugin -o <plugin-name>.so .
+	go build -buildmode=plugin -o wildcard.so .
 
 clean:
 	go clean
@@ -16,3 +16,6 @@ r:
 	docker run -p "8080:8080" gateway
 
 br: b r
+
+run-ci:
+	docker buildx build -t gateway . && docker run -d -p "8080:8080" gateway && sleep 5
